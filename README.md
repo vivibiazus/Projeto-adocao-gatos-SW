@@ -97,12 +97,6 @@ Acesse a documentação interativa em:
 http://localhost:3000/api-docs
 ```
 
-Para autenticar no Swagger:
-1. Execute `POST /api/auth/login`
-2. Copie o `token` retornado
-3. Clique em **Authorize** (canto superior direito)
-4. Cole o token no campo `BearerAuth`
-
 ---
 
 ## Tabela de Rotas
@@ -123,69 +117,6 @@ Para autenticar no Swagger:
 
 ---
 
-## Exemplo de Fluxo Completo
-
-### 1. Cadastrar um adotante
-
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"nome": "Maria Silva", "email": "maria@email.com", "senha": "senha123"}'
-```
-
-### 2. Fazer login e obter o token JWT
-
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "maria@email.com", "senha": "senha123"}'
-```
-
-Resposta:
-```json
-{
-  "status": "success",
-  "data": {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    "user": { "id": "...", "nome": "Maria Silva", "email": "maria@email.com" }
-  }
-}
-```
-
-### 3. Listar gatos disponíveis
-
-```bash
-curl http://localhost:3000/api/gatos?status=Disponível
-```
-
-### 4. Criar pedido de adoção
-
-```bash
-curl -X POST http://localhost:3000/api/pedidos-adocao \
-  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "gato_id": "UUID_DO_GATO",
-    "termos_aceitos": true,
-    "links_comprovantes": ["https://drive.google.com/foto-casa"]
-  }'
-```
-
-O status do gato muda automaticamente para **Em Análise**.
-
-### 5. Aprovar o pedido (como gestor da ONG)
-
-```bash
-curl -X PATCH http://localhost:3000/api/pedidos-adocao/UUID_DO_PEDIDO/status \
-  -H "Authorization: Bearer SEU_TOKEN_AQUI" \
-  -H "Content-Type: application/json" \
-  -d '{"status_pedido": "Aprovado"}'
-```
-
-O status do gato muda para **Adotado** e todos os outros pedidos pendentes para este gato são automaticamente **Rejeitados**.
-
----
-
 ## Testes e Validação
 
 ### Ferramenta utilizada
@@ -199,110 +130,64 @@ O status do gato muda para **Adotado** e todos os outros pedidos pendentes para 
 #### POST /api/auth/register — Registrar adotante
 
 Register com campos obrigatórios ausentes
-![Register faltando informações](docs/prints/register_faltando_info.png)
+![Register faltando informações](prints/dados_ausente_register.png)
 
 Register com e-mail já cadastrado
-![Register e-mail duplicado](docs/prints/register_email_duplicado.png)
+![Register e-mail duplicado](prints/email_ja_cadastrado_register.png)
 
 Register com sucesso
-![Register com sucesso](docs/prints/register_success.png)
+![Register com sucesso](prints/email_sucesso_register.png)
 
 ---
 
 #### POST /api/auth/login — Login e obtenção do JWT
 
 Login com credenciais inválidas
-![Login com dados inválidos](docs/prints/login_invalido.png)
+![Login com dados inválidos](prints/credenciais_invalidas_login.png)
 
 Login com sucesso retornando token JWT
-![Login com sucesso](docs/prints/login_success.png)
+![Login com sucesso](prints/sucesso_token_login.png)
 
 ---
 
 #### GET /api/gatos — Listar gatos
 
 Listagem sem filtro retornando todos os gatos
-![Listar todos os gatos](docs/prints/gatos_listar_todos.png)
-
-Listagem filtrada por `?status=Disponível`
-![Listar gatos por status](docs/prints/gatos_listar_por_status.png)
+![Listar todos os gatos](prints/gatos_sem_id_listar_todos.png)
 
 ---
 
 #### GET /api/gatos/:id — Buscar gato por ID
 
 Busca com ID inexistente retornando 404
-![Gato não encontrado](docs/prints/gato_nao_encontrado.png)
+![Gato não encontrado](prints/gato_nao_encontrado.png)
 
 Busca com sucesso retornando detalhes do gato
-![Buscar gato por ID](docs/prints/gato_por_id.png)
+![Buscar gato por ID](prints/gato_id_valido.png)
 
 ---
 
 #### POST /api/gatos — Cadastrar gato
 
 Tentativa sem token retornando 401
-![Cadastrar gato sem token](docs/prints/gato_sem_token.png)
+![Cadastrar gato sem token](prints/token_invalido_cadastro.png)
 
 Cadastro com sucesso
-![Cadastrar gato com sucesso](docs/prints/gato_cadastrar.png)
+![Cadastrar gato com sucesso](prints/token_valido_cadastro.png)
 
 ---
 
 #### PUT /api/gatos/:id — Atualizar gato
 
 Atualização dos dados do gato pelo ID
-![Atualizar gato](docs/prints/gato_atualizar.png)
+![Atualizar gato](prints/gato_atualizado_id.png)
 
 ---
 
 #### DELETE /api/gatos/:id — Remover gato
 
 Remoção do gato pelo ID
-![Remover gato](docs/prints/gato_remover.png)
-
----
-
-#### POST /api/pedidos-adocao — Criar pedido de adoção
-
-Pedido com `termos_aceitos: false` retornando 400
-![Pedido sem termos aceitos](docs/prints/pedido_termos_recusados.png)
-
-Pedido para gato que não está disponível retornando 409
-![Pedido gato indisponível](docs/prints/pedido_gato_indisponivel.png)
-
-Pedido criado com sucesso — gato muda para `Em Análise`
-![Criar pedido com sucesso](docs/prints/pedido_criar.png)
-
----
-
-#### GET /api/pedidos-adocao — Listar todos os pedidos
-
-Listagem sem token retornando 401
-![Listar pedidos sem token](docs/prints/pedidos_sem_token.png)
-
-Listagem com sucesso retornando pedidos com dados do adotante e do gato
-![Listar todos os pedidos](docs/prints/pedidos_listar.png)
-
----
-
-#### GET /api/pedidos-adocao/meus — Listar meus pedidos
-
-Listagem dos pedidos do usuário autenticado
-![Meus pedidos](docs/prints/pedidos_meus.png)
-
----
-
-#### PATCH /api/pedidos-adocao/:id/status — Atualizar status do pedido
-
-Atualização de pedido já finalizado retornando 409
-![Pedido já finalizado](docs/prints/pedido_ja_finalizado.png)
-
-Rejeição do pedido — gato volta para `Disponível`
-![Rejeitar pedido](docs/prints/pedido_rejeitar.png)
-
-Aprovação do pedido — gato muda para `Adotado` e demais pedidos pendentes são rejeitados automaticamente
-![Aprovar pedido](docs/prints/pedido_aprovar.png)
+![Remover gato](prints/gato_removido.png)
 
 ---
 
@@ -318,29 +203,21 @@ Aprovação do pedido — gato muda para `Adotado` e demais pedidos pendentes s�
 
 ## Contextualização Tecnológica
 
-### Por que Express.js?
+### Express.js
 
 O **Express** é o framework web mais utilizado para Node.js, com ecossistema maduro, documentação extensa e alto desempenho para APIs RESTful de médio porte. Sua filosofia minimalista permite controle granular sobre middlewares e roteamento.
 
-**Alternativa considerada: Fastify** — mais performático (até 2× mais req/s em benchmarks), com validação de schema nativa via JSON Schema, ideal para microsserviços de alta carga. A curva de aprendizado é levemente maior.
-
-### Por que Sequelize?
+### Sequelize
 
 O **Sequelize** é um ORM maduro para Node.js com suporte a PostgreSQL, MySQL, SQLite e MSSQL. Oferece migrações, associações, validações e hooks, reduzindo drasticamente o SQL manual.
 
-**Alternativa considerada: Prisma** — ORM moderno com type-safety nativa, auto-complete excepcional e uma DSL de schema declarativa. É a escolha preferida em novos projetos TypeScript, mas requer compilação e tem curva de adoção maior.
-
-### Por que JWT?
+### JWT
 
 O **JSON Web Token** é stateless — o servidor não precisa armazenar sessões. Ideal para APIs RESTful e arquiteturas distribuídas. O token carrega o payload criptografado, eliminando consulta ao banco a cada request autenticado.
 
-**Alternativa considerada: OAuth2/OpenID Connect** — protocolo de autorização delegada, ideal quando há integração com provedores externos (Google, GitHub). Mais robusto para rotação de tokens e revogação, porém muito mais complexo de implementar do zero.
-
-### Por que PostgreSQL?
+### PostgreSQL
 
 O **PostgreSQL** é um banco relacional robusto, com suporte nativo a UUIDs, arrays (usado em `links_comprovantes`), ENUMs, JSONB e transações ACID. A consistência relacional é essencial para o modelo de dados com FKs entre Gato, User e PedidoAdocao.
-
-**Alternativa considerada: MongoDB** — banco de documentos NoSQL, mais flexível para schemas dinâmicos e escalabilidade horizontal. Seria uma escolha válida se o domínio fosse menos relacional, mas o modelo de adoção tem relacionamentos fortes que se beneficiam da integridade referencial do SQL.
 
 ---
 
