@@ -180,7 +180,7 @@ Cadastro com sucesso
 #### PUT /api/gatos/:id — Atualizar gato
 
 Atualização dos dados do gato pelo ID
-![Atualizar gato](prints/gato_atualizado_id.png)
+![Atualizar gato](prints/gato_atualizado_pelo_id.png)
 
 ---
 
